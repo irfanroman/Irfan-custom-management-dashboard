@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   username TEXT,
   full_name TEXT,
   avatar_url TEXT,
+  monthly_income DECIMAL(12,2) DEFAULT 0,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -127,3 +128,42 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE OR REPLACE TRIGGER on_auth_user_created_categories
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.insert_default_categories();
+
+-- Create budget_goals table
+CREATE TABLE IF NOT EXISTS public.budget_goals (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
+  name TEXT NOT NULL,
+  target_amount DECIMAL(12,2) NOT NULL,
+  current_amount DECIMAL(12,2) DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Enable RLS on budget_goals
+ALTER TABLE public.budget_goals ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage their own budget goals" 
+  ON public.budget_goals FOR ALL 
+  USING (auth.uid() = user_id);
+
+-- Create budget_goal_logs table
+CREATE TABLE IF NOT EXISTS public.budget_goal_logs (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  goal_id UUID REFERENCES public.budget_goals ON DELETE CASCADE NOT NULL,
+  amount DECIMAL(12,2) NOT NULL,
+  source TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Enable RLS on budget_goal_logs
+ALTER TABLE public.budget_goal_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage logs for their own budget goals" 
+  ON public.budget_goal_logs FOR ALL 
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.budget_goals
+      WHERE budget_goals.id = budget_goal_logs.goal_id
+      AND budget_goals.user_id = auth.uid()
+    )
+  );

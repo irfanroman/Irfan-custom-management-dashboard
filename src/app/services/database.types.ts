@@ -15,6 +15,7 @@ export interface Database {
           username: string | null
           full_name: string | null
           avatar_url: string | null
+          monthly_income: number | null
           updated_at: string | null
         }
         Insert: {
@@ -22,6 +23,7 @@ export interface Database {
           username?: string | null
           full_name?: string | null
           avatar_url?: string | null
+          monthly_income?: number | null
           updated_at?: string | null
         }
         Update: {
@@ -29,6 +31,7 @@ export interface Database {
           username?: string | null
           full_name?: string | null
           avatar_url?: string | null
+          monthly_income?: number | null
           updated_at?: string | null
         }
       }
@@ -133,6 +136,55 @@ export interface Database {
           name?: string
           price?: number
           assigned_to?: string[]
+          created_at?: string
+        }
+      }
+      budget_goals: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          target_amount: number
+          current_amount: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          target_amount: number
+          current_amount?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          name?: string
+          target_amount?: number
+          current_amount?: number
+          created_at?: string
+        }
+      }
+      budget_goal_logs: {
+        Row: {
+          id: string
+          goal_id: string
+          amount: number
+          source: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          goal_id: string
+          amount: number
+          source?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          goal_id?: string
+          amount?: number
+          source?: string | null
           created_at?: string
         }
       }

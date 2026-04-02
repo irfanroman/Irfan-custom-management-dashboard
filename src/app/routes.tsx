@@ -3,6 +3,7 @@ import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { FinanceTracker } from './pages/FinanceTracker';
 import { SplitBill } from './pages/SplitBill';
+import { BudgetPlanner } from './pages/BudgetPlanner';
 import { NotFound } from './pages/NotFound';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -32,6 +33,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <SplitBill />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/budget-planner',
+    element: (
+      <ProtectedRoute>
+        <BudgetPlanner />
       </ProtectedRoute>
     ),
   },

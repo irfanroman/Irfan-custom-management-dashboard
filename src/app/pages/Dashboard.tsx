@@ -32,7 +32,6 @@ export function Dashboard() {
       link: '/budget-planner',
       color: 'from-green-500 to-green-600',
       bgColor: 'bg-green-50',
-      comingSoon: true,
     },
     {
       title: 'Receipt Scanner',
