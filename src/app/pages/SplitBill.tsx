@@ -24,7 +24,7 @@ export function SplitBill() {
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [bills, setBills] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [ocrProgress, setOcrProgress] = useState(0);
   const [isScanning, setIsScanning] = useState(false);
   const [activeTab, setActiveTab] = useState<'create' | 'history'>('create');
@@ -86,7 +86,10 @@ export function SplitBill() {
   };
 
   const loadBills = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     try {
       const loadedBills = await dataService.getBills();
