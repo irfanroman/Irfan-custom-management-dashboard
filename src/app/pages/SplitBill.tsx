@@ -31,7 +31,7 @@ export function SplitBill() {
   const [showSummary, setShowSummary] = useState(false);
   const [shareId, setShareId] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
-  
+
   // Create bill form
   const [billTitle, setBillTitle] = useState('');
   const [items, setItems] = useState<any[]>([]);
@@ -43,7 +43,7 @@ export function SplitBill() {
   const [newParticipant, setNewParticipant] = useState('');
   const [tax, setTax] = useState(0);
   const [serviceCharge, setServiceCharge] = useState(0);
-  
+
   // OCR Dialog
 
   const [showOCRDialog, setShowOCRDialog] = useState(false);
@@ -68,14 +68,14 @@ export function SplitBill() {
           assigned_to: []
         }));
         setItems(prev => [...prev, ...formattedItems]);
-        
+
         if (scannedData.tax > 0) setTax(scannedData.tax);
         if (scannedData.serviceCharge > 0) setServiceCharge(scannedData.serviceCharge);
         if (scannedData.discount > 0) {
           setDiscount(scannedData.discount);
           setDiscountType('fixed');
         }
-        
+
         toast.success(`Berhasil mengekstrak ${scannedData.items.length} item!`);
         setShowOCRDialog(false);
       }
@@ -190,7 +190,7 @@ export function SplitBill() {
 
     const subtotal = Object.values(splits).reduce((sum, val) => sum + val, 0);
     let discountAmount = 0;
-    
+
     if (discountType === 'percentage') {
       discountAmount = (subtotal * discount) / 100;
     } else {
@@ -231,13 +231,16 @@ export function SplitBill() {
 
     try {
       setIsLoading(true);
-      const billData = {
+      const billData: any = {
         title: billTitle || 'Patungan Baru',
         participants,
         discount,
         discount_type: discountType,
-        user_id: user?.id || '00000000-0000-0000-0000-000000000000', // Use dummy UUID for guests
       };
+
+      if (user?.id) {
+        billData.user_id = user.id;
+      }
 
       const billItems = items.map(item => ({
         name: item.name,
@@ -247,11 +250,11 @@ export function SplitBill() {
 
       const savedBill = await dataService.addBill(billData, billItems);
       setShareId(savedBill.id);
-      
+
       if (user) {
         loadBills();
       }
-      
+
       setShowSummary(true);
       toast.success(user ? 'Catatan patungan disimpan' : 'Hasil patungan siap dibagikan!');
     } catch (error) {
@@ -285,7 +288,7 @@ export function SplitBill() {
 
   const deleteBill = async (billId: string) => {
     if (!user) return;
-    
+
     if (window.confirm('Yakin ingin menghapus catatan ini?')) {
       try {
         await dataService.deleteBill(billId);
@@ -301,13 +304,13 @@ export function SplitBill() {
     const doc = new jsPDF();
     const splits = calculateSplits();
     const subtotal = items.reduce((sum, item) => sum + item.price, 0);
-    
+
     doc.setFontSize(20);
     doc.text('Ringkasan Patungan', 20, 20);
     doc.setFontSize(12);
     doc.text(billTitle || 'Tanpa Judul', 20, 30);
     doc.text(new Date().toLocaleDateString('id-ID'), 20, 38);
-    
+
     doc.setFontSize(14);
     doc.text('Daftar Item:', 20, 50);
     doc.setFontSize(10);
@@ -317,7 +320,7 @@ export function SplitBill() {
       doc.text(`Ditanggung oleh: ${item.assigned_to.join(', ')}`, 25, yPos + 5);
       yPos += 12;
     });
-    
+
     yPos += 5;
     doc.setFontSize(14);
     doc.text('Ringkasan Total:', 20, yPos);
@@ -325,29 +328,29 @@ export function SplitBill() {
     doc.setFontSize(10);
     doc.text(`Subtotal: ${toIDRCurrency(subtotal)}`, 25, yPos);
     yPos += 6;
-    
+
     if (discount > 0) {
-      const discountAmount = discountType === 'percentage' 
-        ? (subtotal * discount) / 100 
+      const discountAmount = discountType === 'percentage'
+        ? (subtotal * discount) / 100
         : discount;
       doc.text(`Diskon: -${toIDRCurrency(discountAmount)} (${discountType === 'percentage' ? `${discount}%` : 'tetap'})`, 25, yPos);
       yPos += 6;
     }
-    
+
     const total = Object.values(splits).reduce((sum, val) => sum + val, 0);
     doc.text(`Total: ${toIDRCurrency(total)}`, 25, yPos);
     yPos += 10;
-    
+
     doc.setFontSize(14);
     doc.text('Tagihan Per Orang:', 20, yPos);
     yPos += 8;
     doc.setFontSize(12);
-    
+
     Object.entries(splits).forEach(([person, amount]) => {
       doc.text(`${person}: ${toIDRCurrency(amount)}`, 25, yPos);
       yPos += 8;
     });
-    
+
     doc.save(`patungan-${Date.now()}.pdf`);
     toast.success('PDF berhasil diekspor');
   };
@@ -399,7 +402,7 @@ export function SplitBill() {
                         className="dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                       />
                     </div>
-                    
+
                     <div className="flex gap-2">
                       <Button variant="outline" onClick={() => setShowOCRDialog(true)} className="dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
                         <Camera className="w-4 h-4 mr-2" />
@@ -427,7 +430,7 @@ export function SplitBill() {
                         <Plus className="w-4 h-4" />
                       </Button>
                     </div>
-                    
+
                     <div className="flex flex-wrap gap-2">
                       {participants.map((participant) => (
                         <Badge key={participant} variant="secondary" className="text-sm py-2 px-3 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
@@ -442,7 +445,7 @@ export function SplitBill() {
                         </Badge>
                       ))}
                     </div>
-                    
+
                     {participants.length === 0 && (
                       <p className="text-sm text-gray-500 dark:text-slate-500">Belum ada orang ditambahkan</p>
                     )}
@@ -476,7 +479,7 @@ export function SplitBill() {
                         <Plus className="w-4 h-4" />
                       </Button>
                     </div>
-                    
+
                     {items.length > 0 && (
                       <div className="space-y-3">
                         {items.map((item) => (
@@ -496,7 +499,7 @@ export function SplitBill() {
                                   <Trash2 className="w-4 h-4 text-red-500" />
                                 </Button>
                               </div>
-                              
+
                               <div>
                                 <Label className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-slate-500 mb-3 block font-bold">Siapa yang bayar ini?</Label>
                                 <div className="flex flex-wrap gap-2">
@@ -506,11 +509,10 @@ export function SplitBill() {
                                       variant={item.assigned_to.includes(participant) ? "default" : "outline"}
                                       size="sm"
                                       onClick={() => toggleItemAssignment(item.id, participant)}
-                                      className={`text-xs font-semibold px-4 transition-all ${
-                                        item.assigned_to.includes(participant) 
-                                        ? 'bg-black dark:bg-white text-white dark:text-black hover:opacity-90' 
-                                        : 'dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-700'
-                                      }`}
+                                      className={`text-xs font-semibold px-4 transition-all ${item.assigned_to.includes(participant)
+                                          ? 'bg-black dark:bg-white text-white dark:text-black hover:opacity-90'
+                                          : 'dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-700'
+                                        }`}
                                     >
                                       {participant}
                                     </Button>
@@ -528,7 +530,7 @@ export function SplitBill() {
                         ))}
                       </div>
                     )}
-                    
+
                     {items.length === 0 && (
                       <p className="text-sm text-gray-500 dark:text-slate-500">Belum ada item ditambahkan</p>
                     )}
@@ -561,7 +563,7 @@ export function SplitBill() {
                         />
                       </div>
                     </div>
-                    
+
                     <div className="flex gap-2 items-end">
                       <div className="flex-1">
                         {discountType === 'fixed' ? (
@@ -574,15 +576,15 @@ export function SplitBill() {
                           />
                         ) : (
                           <div className="space-y-2">
-                             <Label htmlFor="discount-percent" className="dark:text-slate-300">Persentase Diskon (%)</Label>
-                             <Input 
-                               id="discount-percent"
-                               type="number"
-                               value={discount || ''}
-                               onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
-                               placeholder="0"
-                               className="dark:bg-slate-800 dark:border-slate-700 dark:text-white h-11"
-                             />
+                            <Label htmlFor="discount-percent" className="dark:text-slate-300">Persentase Diskon (%)</Label>
+                            <Input
+                              id="discount-percent"
+                              type="number"
+                              value={discount || ''}
+                              onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                              placeholder="0"
+                              className="dark:bg-slate-800 dark:border-slate-700 dark:text-white h-11"
+                            />
                           </div>
                         )}
                       </div>
@@ -702,21 +704,21 @@ export function SplitBill() {
 
                   <div className="space-y-3 pt-4">
                     {shareId && (
-                      <Button 
+                      <Button
                         onClick={() => {
                           const url = `${window.location.origin}/s/${shareId}`;
                           navigator.clipboard.writeText(url);
                           setIsCopied(true);
                           toast.success('Link berhasil disalin!');
                           setTimeout(() => setIsCopied(false), 2000);
-                        }} 
+                        }}
                         className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg transition-all"
                       >
                         {isCopied ? <Check className="w-4 h-4 mr-2" /> : <Share2 className="w-4 h-4 mr-2" />}
                         {isCopied ? 'Berhasil Disalin!' : 'Salin Link Berbagi (5 Jam)'}
                       </Button>
                     )}
-                    
+
                     <div className="flex gap-3">
                       <Button onClick={exportSummaryToPDF} variant="outline" className="flex-1 h-12 font-bold dark:border-slate-700 dark:hover:bg-slate-800">
                         <Download className="w-4 h-4 mr-2" />
@@ -767,7 +769,7 @@ export function SplitBill() {
                   <div className="space-y-4">
                     {bills.map((bill) => {
                       const billTotal = bill.bill_items?.reduce((sum: number, item: any) => sum + item.price, 0) || 0;
-                      
+
                       return (
                         <Card key={bill.id} className="dark:bg-slate-800/50 dark:border-slate-700 transition-all hover:shadow-md cursor-pointer group">
                           <CardContent className="pt-6 px-6">
@@ -794,7 +796,7 @@ export function SplitBill() {
                                 </Button>
                               </div>
                             </div>
-                            
+
                             <div className="flex flex-wrap gap-1.5 border-t dark:border-slate-700/50 pt-4 mt-2">
                               {bill.participants.map((p: string) => (
                                 <Badge key={p} variant="secondary" className="text-[10px] font-bold px-2.5 dark:bg-slate-700 dark:text-slate-300">
@@ -823,12 +825,11 @@ export function SplitBill() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div 
-              className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all ${
-                isScanning 
-                ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/20' 
-                : 'border-gray-200 dark:border-slate-700 hover:border-black dark:hover:border-white hover:bg-gray-50 dark:hover:bg-slate-800/50'
-              }`}
+            <div
+              className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all ${isScanning
+                  ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/20'
+                  : 'border-gray-200 dark:border-slate-700 hover:border-black dark:hover:border-white hover:bg-gray-50 dark:hover:bg-slate-800/50'
+                }`}
             >
               <input
                 type="file"
@@ -849,8 +850,8 @@ export function SplitBill() {
                   </div>
                 </div>
               ) : (
-                <div 
-                  className="cursor-pointer space-y-4" 
+                <div
+                  className="cursor-pointer space-y-4"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <div className="w-16 h-16 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-2 text-gray-400 dark:text-slate-500 shadow-inner">
@@ -867,7 +868,7 @@ export function SplitBill() {
                 </div>
               )}
             </div>
-            
+
             <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-xl p-4">
               <p className="text-[10px] font-bold text-amber-800 dark:text-amber-400 uppercase tracking-widest flex items-center gap-2">
                 <div className="w-1 h-1 rounded-full bg-amber-500" />

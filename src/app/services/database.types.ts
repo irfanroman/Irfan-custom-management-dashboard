@@ -100,7 +100,7 @@ export interface Database {
           participants: string[]
           discount?: number
           discount_type?: 'percentage' | 'fixed'
-          user_id: string
+          user_id?: string | null
           created_at?: string
         }
         Update: {
