@@ -4,6 +4,7 @@ import { Dashboard } from './pages/Dashboard';
 import { FinanceTracker } from './pages/FinanceTracker';
 import { SplitBill } from './pages/SplitBill';
 import { BudgetPlanner } from './pages/BudgetPlanner';
+import { SharedBill } from './pages/SharedBill';
 import { NotFound } from './pages/NotFound';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -27,6 +28,10 @@ export const router = createBrowserRouter([
   {
     path: '/split-bill',
     element: <SplitBill />,
+  },
+  {
+    path: '/s/:id',
+    element: <SharedBill />,
   },
   {
     path: '/budget-planner',

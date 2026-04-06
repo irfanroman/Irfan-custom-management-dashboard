@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
-import { ArrowLeft, Plus, Trash2, Users, Receipt, Download, Camera, Loader2, Upload } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Users, Receipt, Download, Camera, Loader2, Upload, Share2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 
@@ -29,6 +29,8 @@ export function SplitBill() {
   const [isScanning, setIsScanning] = useState(false);
   const [activeTab, setActiveTab] = useState<'create' | 'history'>('create');
   const [showSummary, setShowSummary] = useState(false);
+  const [shareId, setShareId] = useState<string | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
   
   // Create bill form
   const [billTitle, setBillTitle] = useState('');
@@ -227,20 +229,14 @@ export function SplitBill() {
       return;
     }
 
-    if (!user) {
-      setShowSummary(true);
-      toast.success('Patungan selesai dihitung!');
-      return;
-    }
-
     try {
       setIsLoading(true);
       const billData = {
-        title: billTitle,
+        title: billTitle || 'Patungan Baru',
         participants,
         discount,
         discount_type: discountType,
-        user_id: user.id,
+        user_id: user?.id || '00000000-0000-0000-0000-000000000000', // Use dummy UUID for guests
       };
 
       const billItems = items.map(item => ({
@@ -249,12 +245,24 @@ export function SplitBill() {
         assigned_to: item.assigned_to,
       }));
 
-      await dataService.addBill(billData, billItems);
-      loadBills();
+      const savedBill = await dataService.addBill(billData, billItems);
+      setShareId(savedBill.id);
+      
+      if (user) {
+        loadBills();
+      }
+      
       setShowSummary(true);
-      toast.success('Catatan patungan disimpan');
+      toast.success(user ? 'Catatan patungan disimpan' : 'Hasil patungan siap dibagikan!');
     } catch (error) {
-      toast.error('Gagal menyimpan ke database');
+      console.error(error);
+      // Fallback for guests if DB fails (e.g. RLS not set up for public)
+      if (!user) {
+        setShowSummary(true);
+        toast.info('Dihitung secara lokal (Gagal simpan ke cloud)');
+      } else {
+        toast.error('Gagal menyimpan ke database');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -272,6 +280,7 @@ export function SplitBill() {
     setNewItemPrice(0);
     setNewParticipant('');
     setShowSummary(false);
+    setShareId(null);
   };
 
   const deleteBill = async (billId: string) => {
@@ -633,7 +642,7 @@ export function SplitBill() {
                   <CardContent className="pt-6 px-6 pb-6">
                     <Button onClick={saveBill} className="w-full h-12 bg-black dark:bg-white text-white dark:text-black font-bold text-base shadow-xl hover:bg-gray-800 dark:hover:bg-gray-200 transition-all active:scale-[0.98]" disabled={isLoading}>
                       {isLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Receipt className="w-5 h-5 mr-2" />}
-                      {user ? 'Hitung & Simpan Patungan' : 'Hitung Patungan'}
+                      Hitung & Simpan Patungan
                     </Button>
                   </CardContent>
                 </Card>
@@ -691,14 +700,32 @@ export function SplitBill() {
                     </div>
                   </div>
 
-                  <div className="flex gap-3 pt-4">
-                    <Button onClick={exportSummaryToPDF} variant="outline" className="flex-1 h-12 font-bold dark:border-slate-700 dark:hover:bg-slate-800">
-                      <Download className="w-4 h-4 mr-2" />
-                      Ekspor PDF
-                    </Button>
-                    <Button onClick={resetForm} variant="outline" className="flex-1 h-12 font-bold dark:border-slate-700 dark:hover:bg-slate-800">
-                      Buat Baru
-                    </Button>
+                  <div className="space-y-3 pt-4">
+                    {shareId && (
+                      <Button 
+                        onClick={() => {
+                          const url = `${window.location.origin}/s/${shareId}`;
+                          navigator.clipboard.writeText(url);
+                          setIsCopied(true);
+                          toast.success('Link berhasil disalin!');
+                          setTimeout(() => setIsCopied(false), 2000);
+                        }} 
+                        className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg transition-all"
+                      >
+                        {isCopied ? <Check className="w-4 h-4 mr-2" /> : <Share2 className="w-4 h-4 mr-2" />}
+                        {isCopied ? 'Berhasil Disalin!' : 'Salin Link Berbagi (5 Jam)'}
+                      </Button>
+                    )}
+                    
+                    <div className="flex gap-3">
+                      <Button onClick={exportSummaryToPDF} variant="outline" className="flex-1 h-12 font-bold dark:border-slate-700 dark:hover:bg-slate-800">
+                        <Download className="w-4 h-4 mr-2" />
+                        Ekspor PDF
+                      </Button>
+                      <Button onClick={resetForm} variant="outline" className="flex-1 h-12 font-bold dark:border-slate-700 dark:hover:bg-slate-800">
+                        Buat Baru
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

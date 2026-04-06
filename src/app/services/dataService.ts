@@ -23,7 +23,7 @@ class DataService {
       .from('transactions')
       .select('*')
       .order('date', { ascending: false });
-    
+
     if (error) throw error;
     return data || [];
   }
@@ -34,7 +34,7 @@ class DataService {
       .insert(transaction)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data;
   }
@@ -46,7 +46,7 @@ class DataService {
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data;
   }
@@ -56,7 +56,7 @@ class DataService {
       .from('transactions')
       .delete()
       .eq('id', id);
-    
+
     if (error) throw error;
   }
 
@@ -66,9 +66,9 @@ class DataService {
       .from('categories')
       .select('*')
       .order('name', { ascending: true });
-    
+
     if (error) throw error;
-    
+
     // If no categories, return defaults (handled by the caller or we can insert them here)
     return data || [];
   }
@@ -79,7 +79,7 @@ class DataService {
       .insert(category)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data;
   }
@@ -89,7 +89,7 @@ class DataService {
       .from('categories')
       .delete()
       .eq('id', id);
-    
+
     if (error) throw error;
   }
 
@@ -99,7 +99,7 @@ class DataService {
       .from('bills')
       .select('*, bill_items(*)')
       .order('created_at', { ascending: false });
-    
+
     if (error) throw error;
     return data || [];
   }
@@ -112,7 +112,7 @@ class DataService {
       .insert(bill)
       .select()
       .single();
-    
+
     if (billError) throw billError;
 
     if (items.length > 0) {
@@ -120,11 +120,11 @@ class DataService {
         ...item,
         bill_id: billData.id
       }));
-      
+
       const { error: itemsError } = await supabase
         .from('bill_items')
         .insert(itemsToInsert);
-      
+
       if (itemsError) throw itemsError;
     }
 
@@ -136,8 +136,19 @@ class DataService {
       .from('bills')
       .delete()
       .eq('id', id);
-    
+
     if (error) throw error;
+  }
+
+  async getBillById(id: string) {
+    const { data, error } = await supabase
+      .from('bills')
+      .select('*, bill_items(*)')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    return data;
   }
 
   // Profile
@@ -147,7 +158,7 @@ class DataService {
       .select('*')
       .eq('id', userId)
       .single();
-    
+
     if (error) throw error;
     return data;
   }
@@ -159,7 +170,7 @@ class DataService {
       .eq('id', userId)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data;
   }
@@ -170,7 +181,7 @@ class DataService {
       .from('budget_goals')
       .select('*')
       .order('created_at', { ascending: false });
-    
+
     if (error) throw error;
     return data || [];
   }
@@ -181,7 +192,7 @@ class DataService {
       .insert(goal)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data;
   }
@@ -193,7 +204,7 @@ class DataService {
       .eq('id', id)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data;
   }
@@ -203,7 +214,7 @@ class DataService {
       .from('budget_goals')
       .delete()
       .eq('id', id);
-    
+
     if (error) throw error;
   }
 
@@ -214,7 +225,7 @@ class DataService {
       .select('*')
       .eq('goal_id', goalId)
       .order('created_at', { ascending: false });
-    
+
     if (error) throw error;
     return data || [];
   }
@@ -225,7 +236,7 @@ class DataService {
       .insert(log)
       .select()
       .single();
-    
+
     if (error) throw error;
     return data;
   }
