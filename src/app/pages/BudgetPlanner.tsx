@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Progress } from '../components/ui/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { ArrowLeft, Plus, Pencil, Trash2, Target, TrendingUp, Loader2, Clock, ListChecks, History } from 'lucide-react';
+import { ThemeToggle } from '../components/ThemeToggle';
 import { toast } from 'sonner';
 
 export function BudgetPlanner() {
@@ -155,123 +156,139 @@ export function BudgetPlanner() {
   const totalTarget = goals.reduce((sum, goal) => sum + goal.target_amount, 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <header className="bg-white border-b sticky top-0 z-10 shadow-sm">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-500">
+      <header className="bg-white/80 dark:bg-slate-900/80 border-b dark:border-slate-800 sticky top-0 z-10 shadow-sm backdrop-blur-md">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to="/dashboard">
-              <Button variant="ghost" size="sm">
+            <Link to="/">
+              <Button variant="ghost" size="sm" className="dark:text-white dark:hover:bg-slate-800">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Kembali
               </Button>
             </Link>
-            <h1 className="text-xl font-bold">Budget Planner</h1>
+            <h1 className="text-xl font-bold dark:text-white">Budget Planner</h1>
           </div>
+          <ThemeToggle />
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
         {/* Summary Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Card className="border-green-100 bg-green-50/30">
+          <Card className="border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/30 dark:bg-emerald-900/10 backdrop-blur-sm">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardDescription className="text-green-600 font-medium capitalize">Total Semua Tabungan</CardDescription>
-                <TrendingUp className="w-5 h-5 text-green-500" />
+                <CardDescription className="text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-widest text-[10px]">Total Semua Tabungan</CardDescription>
+                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/40 rounded-lg">
+                  <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                </div>
               </div>
-              <CardTitle className="text-3xl text-green-900">{toIDRCurrency(totalSaved)}</CardTitle>
+              <CardTitle className="text-3xl font-black text-emerald-900 dark:text-emerald-300 tracking-tighter">{toIDRCurrency(totalSaved)}</CardTitle>
             </CardHeader>
           </Card>
 
-          <Card className="border-blue-100 bg-blue-50/30">
+          <Card className="border-blue-100 dark:border-blue-900/30 bg-blue-50/30 dark:bg-blue-900/10 backdrop-blur-sm">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardDescription className="text-blue-600 font-medium capitalize">Total Target Terdaftar</CardDescription>
-                <ListChecks className="w-5 h-5 text-blue-500" />
+                <CardDescription className="text-blue-700 dark:text-blue-400 font-bold uppercase tracking-widest text-[10px]">Total Target Terdaftar</CardDescription>
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-lg">
+                  <ListChecks className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                </div>
               </div>
-              <CardTitle className="text-3xl text-blue-900">{toIDRCurrency(totalTarget)}</CardTitle>
+              <CardTitle className="text-3xl font-black text-blue-900 dark:text-blue-300 tracking-tighter">{toIDRCurrency(totalTarget)}</CardTitle>
             </CardHeader>
           </Card>
         </div>
 
         {/* Goals Section */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Target className="w-6 h-6 text-red-500" />
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3 tracking-tight">
+            <div className="p-2 bg-rose-100 dark:bg-rose-900/30 rounded-xl">
+              <Target className="w-6 h-6 text-rose-500" />
+            </div>
             Target Tabungan
           </h2>
-          <Button onClick={() => setIsAddingGoal(true)}>
+          <Button onClick={() => setIsAddingGoal(true)} className="bg-black dark:bg-white text-white dark:text-black font-bold h-11 px-6 shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-transform">
             <Plus className="w-4 h-4 mr-2" />
             Tambah Target
           </Button>
         </div>
 
         {goals.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-2xl border-2 border-dashed border-gray-200">
-            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Target className="w-8 h-8 text-gray-300" />
+          <div className="text-center py-20 bg-white/50 dark:bg-slate-900/50 rounded-3xl border-2 border-dashed border-gray-200 dark:border-slate-800 backdrop-blur-sm">
+            <div className="w-20 h-20 bg-gray-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+              <Target className="w-10 h-10 text-gray-300 dark:text-slate-600" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900">Belum ada target</h3>
-            <p className="text-gray-500">Mulai buat rencana tabungan untuk impian kamu.</p>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Belum ada target</h3>
+            <p className="text-gray-500 dark:text-slate-400 font-medium">Mulai buat rencana tabungan untuk impian kamu.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {goals.map((goal) => {
               const progress = Math.min((goal.current_amount / goal.target_amount) * 100, 100);
               return (
-                <Card key={goal.id} className="overflow-hidden transition-all hover:shadow-lg border-white shadow-sm hover:border-blue-100">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between mb-1">
-                      <CardTitle className="text-lg font-bold">{goal.name}</CardTitle>
-                      <div className="flex gap-1">
+                <Card key={goal.id} className="overflow-hidden group border-white/50 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-lg transition-all hover:shadow-2xl hover:-translate-y-1">
+                  <CardHeader className="pb-4 pt-6 px-6">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="space-y-1">
+                        <CardTitle className="text-xl font-black dark:text-white group-hover:text-primary transition-colors">{goal.name}</CardTitle>
+                        <CardDescription className="font-bold text-xs dark:text-slate-500 uppercase tracking-widest">
+                          TARGET: {toIDRCurrency(goal.target_amount)}
+                        </CardDescription>
+                      </div>
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button variant="ghost" size="sm" onClick={() => {
                           setSelectedGoal(goal);
                           setGoalFormData({ name: goal.name, target_amount: goal.target_amount });
                           setIsEditingGoal(true);
-                        }}>
-                          <Pencil className="w-3 h-3" />
+                        }} className="h-8 w-8 p-0 dark:text-slate-400 dark:hover:text-white">
+                          <Pencil className="w-3.5 h-3.5" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDeleteGoal(goal.id)}>
-                          <Trash2 className="w-3 h-3 text-red-400" />
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteGoal(goal.id)} className="h-8 w-8 p-0 dark:text-slate-400 dark:hover:text-rose-500">
+                          <Trash2 className="w-3.5 h-3.5" />
                         </Button>
                       </div>
                     </div>
-                    <CardDescription>
-                      Target: {toIDRCurrency(goal.target_amount)}
-                    </CardDescription>
                   </CardHeader>
-                  <CardContent className="py-4">
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="font-medium text-gray-600">Terdaftar</span>
-                      <span className="font-bold text-blue-600">{toIDRCurrency(goal.current_amount)}</span>
+                  <CardContent className="py-2 px-6">
+                    <div className="flex justify-between items-end mb-3">
+                       <div className="space-y-0.5">
+                        <p className="text-[10px] font-black text-slate-500 dark:text-slate-500 uppercase tracking-widest">Terkumpul</p>
+                        <p className="text-xl font-black text-blue-600 dark:text-blue-400 tabular-nums tracking-tighter">{toIDRCurrency(goal.current_amount)}</p>
+                      </div>
+                      <div className="text-right space-y-0.5">
+                        <p className="text-[10px] font-black text-slate-500 dark:text-slate-500 uppercase tracking-widest">Progress</p>
+                        <p className="text-xl font-bold dark:text-white tabular-nums tracking-tight">{progress.toFixed(1)}%</p>
+                      </div>
                     </div>
-                    <Progress value={progress} className="h-2 mb-2" />
-                    <div className="flex justify-between items-center">
-                       <Button 
+                    <div className="relative">
+                      <Progress value={progress} className="h-3.5 bg-slate-100 dark:bg-slate-800 rounded-full" />
+                      <div className="absolute inset-0 bg-blue-400/10 animate-pulse rounded-full" style={{ width: `${progress}%` }} />
+                    </div>
+                    
+                    <div className="mt-4 flex justify-start">
+                      <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="text-xs h-7 px-2 text-gray-500 flex items-center gap-1"
+                        className="text-[10px] font-black uppercase tracking-widest h-8 px-3 text-slate-500 hover:text-black dark:text-slate-500 dark:hover:text-slate-300 flex items-center gap-1.5 transition-colors"
                         onClick={() => handleViewHistory(goal)}
                       >
                         <History className="w-3 h-3" />
-                        Lihat Riwayat
+                        Lihat Riwayat Tabungan
                       </Button>
-                      <p className="text-right text-xs font-bold text-gray-500">
-                        {progress.toFixed(1)}%
-                      </p>
                     </div>
                   </CardContent>
-                  <CardFooter className="bg-gray-50/50 pt-4">
+                  <CardFooter className="bg-slate-50/50 dark:bg-slate-800/30 p-4 mt-4 border-t dark:border-slate-800/50">
                     <Button 
                       variant="outline" 
-                      className="w-full bg-white hover:bg-blue-50 hover:text-blue-600 border-blue-100"
+                      className="w-full h-11 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 font-bold text-sm tracking-tight hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-all active:scale-[0.98]"
                       onClick={() => {
                         setSelectedGoal(goal);
                         setIsUpdatingProgress(true);
                       }}
                     >
                       <Plus className="w-4 h-4 mr-2" />
-                      Tambah Tabungan
+                      Tambah Saldo Tabungan
                     </Button>
                   </CardFooter>
                 </Card>
@@ -283,19 +300,20 @@ export function BudgetPlanner() {
 
       {/* Add Goal Dialog */}
       <Dialog open={isAddingGoal} onOpenChange={setIsAddingGoal}>
-        <DialogContent>
+        <DialogContent className="dark:bg-slate-900 dark:border-slate-800">
           <DialogHeader>
-            <DialogTitle>Tambah Target Baru</DialogTitle>
-            <DialogDescription>Tentukan apa yang ingin kamu capai.</DialogDescription>
+            <DialogTitle className="text-2xl font-black dark:text-white tracking-tight">Tambah Target Baru</DialogTitle>
+            <DialogDescription className="dark:text-slate-400 font-medium">Tentukan apa yang ingin kamu capai.</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 pt-4">
+          <div className="space-y-6 pt-4">
             <div className="space-y-2">
-              <Label htmlFor="goal-name">Nama Target</Label>
+              <Label htmlFor="goal-name" className="dark:text-slate-300 font-bold">Nama Target</Label>
               <Input
                 id="goal-name"
                 placeholder="Contoh: Beli Laptop Baru"
                 value={goalFormData.name}
                 onChange={(e) => setGoalFormData({ ...goalFormData, name: e.target.value })}
+                className="h-11 dark:bg-slate-800 dark:border-slate-700 dark:text-white"
               />
             </div>
             <AmountInput
@@ -303,28 +321,30 @@ export function BudgetPlanner() {
               label="Harga Tujuan"
               value={goalFormData.target_amount}
               onChange={(val) => setGoalFormData({ ...goalFormData, target_amount: val })}
+              className="dark:text-white"
             />
           </div>
-          <DialogFooter className="pt-6">
-            <Button variant="outline" onClick={() => setIsAddingGoal(false)}>Batal</Button>
-            <Button onClick={handleAddGoal}>Simpan Target</Button>
+          <DialogFooter className="pt-8 flex gap-2">
+            <Button variant="outline" onClick={() => setIsAddingGoal(false)} className="dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 flex-1 font-bold">Batal</Button>
+            <Button onClick={handleAddGoal} className="bg-black dark:bg-white text-white dark:text-black font-black flex-1 shadow-xl">Simpan Target</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Edit Goal Dialog */}
       <Dialog open={isEditingGoal} onOpenChange={setIsEditingGoal}>
-        <DialogContent>
+        <DialogContent className="dark:bg-slate-900 dark:border-slate-800">
           <DialogHeader>
-            <DialogTitle>Ubah Target</DialogTitle>
+            <DialogTitle className="text-2xl font-black dark:text-white tracking-tight">Ubah Target</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 pt-4">
+          <div className="space-y-6 pt-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-goal-name">Nama Target</Label>
+              <Label htmlFor="edit-goal-name" className="dark:text-slate-300 font-bold">Nama Target</Label>
               <Input
                 id="edit-goal-name"
                 value={goalFormData.name}
                 onChange={(e) => setGoalFormData({ ...goalFormData, name: e.target.value })}
+                className="h-11 dark:bg-slate-800 dark:border-slate-700 dark:text-white"
               />
             </div>
             <AmountInput
@@ -332,89 +352,97 @@ export function BudgetPlanner() {
               label="Harga Tujuan"
               value={goalFormData.target_amount}
               onChange={(val) => setGoalFormData({ ...goalFormData, target_amount: val })}
+              className="dark:text-white"
             />
           </div>
-          <DialogFooter className="pt-6">
-            <Button variant="outline" onClick={() => setIsEditingGoal(false)}>Batal</Button>
-            <Button onClick={handleEditGoal}>Simpan Perubahan</Button>
+          <DialogFooter className="pt-8 flex gap-2">
+            <Button variant="outline" onClick={() => setIsEditingGoal(false)} className="dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 flex-1 font-bold">Batal</Button>
+            <Button onClick={handleEditGoal} className="bg-black dark:bg-white text-white dark:text-black font-black flex-1 shadow-xl">Simpan Perubahan</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Update Progress Dialog */}
       <Dialog open={isUpdatingProgress} onOpenChange={setIsUpdatingProgress}>
-        <DialogContent>
+        <DialogContent className="dark:bg-slate-900 dark:border-slate-800">
           <DialogHeader>
-            <DialogTitle>Tambah Tabungan</DialogTitle>
-            <DialogDescription>
-              Tambah saldo untuk target: <strong>{selectedGoal?.name}</strong>
+            <DialogTitle className="text-2xl font-black dark:text-white tracking-tight">Tambah Tabungan</DialogTitle>
+            <DialogDescription className="dark:text-slate-400 font-medium">
+              Tambah saldo untuk target: <span className="text-black dark:text-white font-bold">{selectedGoal?.name}</span>
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 pt-4">
+          <div className="space-y-6 pt-4">
             <AmountInput
               id="progress-amount"
               label="Jumlah Tabungan"
               value={progressAmount}
               onChange={(val) => setProgressAmount(val)}
+              className="dark:text-white"
             />
             <div className="space-y-2">
-              <Label htmlFor="progress-source">Sumber Dana (Opsional)</Label>
+              <Label htmlFor="progress-source" className="dark:text-slate-300 font-bold">Sumber Dana (Opsional)</Label>
               <Input
                 id="progress-source"
                 placeholder="Contoh: Gaji bulan April / Bonus"
                 value={progressSource}
                 onChange={(e) => setProgressSource(e.target.value)}
+                className="h-11 dark:bg-slate-800 dark:border-slate-700 dark:text-white"
               />
             </div>
           </div>
-          <DialogFooter className="pt-6">
-            <Button variant="outline" onClick={() => setIsUpdatingProgress(false)}>Batal</Button>
-            <Button onClick={handleUpdateProgress}>Tambah Sekarang</Button>
+          <DialogFooter className="pt-8 flex gap-2">
+            <Button variant="outline" onClick={() => setIsUpdatingProgress(false)} className="dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 flex-1 font-bold">Batal</Button>
+            <Button onClick={handleUpdateProgress} className="bg-black dark:bg-white text-white dark:text-black font-black flex-1 shadow-xl">Tambah Sekarang</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* History Dialog */}
       <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl dark:bg-slate-900 dark:border-slate-800">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <History className="w-5 h-5 text-blue-600" />
-              Riwayat Tabungan: {selectedGoal?.name}
+            <DialogTitle className="flex items-center gap-3 text-2xl font-black dark:text-white tracking-tight">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
+                <History className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              Riwayat: {selectedGoal?.name}
             </DialogTitle>
-            <DialogDescription>
-              Detail penambahan dana untuk target ini.
+            <DialogDescription className="dark:text-slate-400 font-medium">
+              Detail penambahan dana untuk target impianmu.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
-            <div className="max-h-[300px] overflow-auto rounded-lg border">
+          <div className="py-6">
+            <div className="max-h-[350px] overflow-auto rounded-2xl border dark:border-slate-800 bg-slate-50/30 dark:bg-slate-900/50">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Tanggal</TableHead>
-                    <TableHead>Sumber</TableHead>
-                    <TableHead className="text-right">Jumlah</TableHead>
+                  <TableRow className="dark:border-slate-800 hover:bg-transparent">
+                    <TableHead className="text-[10px] font-black uppercase tracking-widest dark:text-slate-500">Tanggal</TableHead>
+                    <TableHead className="text-[10px] font-black uppercase tracking-widest dark:text-slate-500">Sumber Dana</TableHead>
+                    <TableHead className="text-right text-[10px] font-black uppercase tracking-widest dark:text-slate-500">Jumlah</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {selectedGoalLogs.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={3} className="text-center py-8 text-gray-500">
-                        Belum ada riwayat penambahan.
+                    <TableRow className="hover:bg-transparent">
+                      <TableCell colSpan={3} className="text-center py-20 text-slate-500 grayscale opacity-40">
+                        <div className="flex flex-col items-center gap-3">
+                          <Clock className="w-10 h-10 mb-2" />
+                          <p className="font-black text-xs uppercase tracking-widest">BELUM ADA RIWAYAT</p>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ) : (
                     selectedGoalLogs.map((log) => (
-                      <TableRow key={log.id}>
-                        <TableCell className="text-xs text-gray-500">
+                      <TableRow key={log.id} className="dark:border-slate-800 dark:hover:bg-slate-800/50 group">
+                        <TableCell className="text-xs text-slate-500 dark:text-slate-400 font-medium tabular-nums">
                           {new Date(log.created_at).toLocaleDateString('id-ID', {
                             day: 'numeric',
-                            month: 'short',
+                            month: 'long',
                             year: 'numeric'
                           })}
                         </TableCell>
-                        <TableCell className="font-medium">{log.source}</TableCell>
-                        <TableCell className="text-right text-green-600 font-bold">
+                        <TableCell className="font-bold dark:text-slate-200">{log.source}</TableCell>
+                        <TableCell className="text-right text-emerald-600 dark:text-emerald-400 font-black tabular-nums tracking-tighter">
                           +{toIDRCurrency(log.amount)}
                         </TableCell>
                       </TableRow>
@@ -425,7 +453,7 @@ export function BudgetPlanner() {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={() => setIsHistoryOpen(false)}>Tutup</Button>
+            <Button onClick={() => setIsHistoryOpen(false)} className="w-full h-11 bg-black dark:bg-white text-white dark:text-black font-black">Tutup Riwayat</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

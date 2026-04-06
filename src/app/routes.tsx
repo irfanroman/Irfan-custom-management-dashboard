@@ -10,15 +10,11 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 export const router = createBrowserRouter([
   {
     path: '/',
-    Component: Login,
+    Component: Dashboard,
   },
   {
-    path: '/dashboard',
-    element: (
-      <ProtectedRoute>
-        <Dashboard />
-      </ProtectedRoute>
-    ),
+    path: '/login',
+    Component: Login,
   },
   {
     path: '/finance-tracker',
@@ -30,11 +26,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/split-bill',
-    element: (
-      <ProtectedRoute>
-        <SplitBill />
-      </ProtectedRoute>
-    ),
+    element: <SplitBill />,
   },
   {
     path: '/budget-planner',
