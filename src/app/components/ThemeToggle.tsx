@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { useEffect, useState } from 'react';
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   // Avoid hydration mismatch
@@ -16,18 +16,20 @@ export function ThemeToggle() {
     return <div className="w-10 h-10" />;
   }
 
+  const isDark = resolvedTheme === 'dark';
+
   return (
     <Button
       variant="ghost"
       size="icon"
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      onClick={() => setTheme(isDark ? 'light' : 'dark')}
       className="rounded-full w-10 h-10 transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800"
       aria-label="Toggle theme"
     >
-      {theme === 'dark' ? (
+      {isDark ? (
         <Sun className="h-5 w-5 text-yellow-400 fill-yellow-400" />
       ) : (
-        <Moon className="h-5 w-5 text-zinc-900 fill-zinc-900" />
+        <Moon className="h-5 w-5 text-slate-700 fill-slate-700" />
       )}
     </Button>
   );
