@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router';
 import { useAuth } from '../contexts/AuthContext';
 import { dataService } from '../services/dataService';
@@ -48,7 +48,7 @@ export function FinanceTracker() {
       setTransactions(loadedTransactions);
       setCategories(loadedCategories);
     } catch (error) {
-      toast.error('Failed to load data from Supabase');
+      toast.error('Gagal memuat data dari Supabase');
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -63,7 +63,7 @@ export function FinanceTracker() {
 
   const handleAddTransaction = async () => {
     if (!user || !formData.description || !formData.amount || !formData.category) {
-      toast.error('Please fill in all fields');
+      toast.error('Mohon isi semua kolom');
       return;
     }
 
@@ -78,15 +78,15 @@ export function FinanceTracker() {
       loadData();
       setIsAddDialogOpen(false);
       resetForm();
-      toast.success('Transaction added successfully');
+      toast.success('Transaksi berhasil ditambahkan');
     } catch (error) {
-      toast.error('Failed to add transaction');
+      toast.error('Gagal menambah transaksi');
     }
   };
 
   const handleUpdateTransaction = async () => {
     if (!user || !editingTransaction || !formData.description || !formData.amount || !formData.category) {
-      toast.error('Please fill in all fields');
+      toast.error('Mohon isi semua kolom');
       return;
     }
 
@@ -101,22 +101,22 @@ export function FinanceTracker() {
       setIsEditDialogOpen(false);
       setEditingTransaction(null);
       resetForm();
-      toast.success('Transaction updated successfully');
+      toast.success('Transaksi berhasil diperbarui');
     } catch (error) {
-      toast.error('Failed to update transaction');
+      toast.error('Gagal memperbarui transaksi');
     }
   };
 
   const handleDeleteTransaction = async (transactionId: string) => {
     if (!user) return;
     
-    if (window.confirm('Are you sure you want to delete this transaction?')) {
+    if (window.confirm('Yakin ingin menghapus transaksi ini?')) {
       try {
         await dataService.deleteTransaction(transactionId);
         loadData();
-        toast.success('Transaction deleted successfully');
+        toast.success('Transaksi berhasil dihapus');
       } catch (error) {
-        toast.error('Failed to delete transaction');
+        toast.error('Gagal menghapus transaksi');
       }
     }
   };
@@ -134,7 +134,7 @@ export function FinanceTracker() {
 
   const handleAddCategory = async () => {
     if (!user || !newCategory.trim()) {
-      toast.error('Please enter a category name');
+      toast.error('Mohon isi nama kategori');
       return;
     }
 
@@ -145,9 +145,9 @@ export function FinanceTracker() {
       });
       loadData();
       setNewCategory('');
-      toast.success('Category added successfully');
+      toast.success('Kategori berhasil ditambahkan');
     } catch (error) {
-      toast.error('Failed to add category');
+      toast.error('Gagal menambah kategori');
     }
   };
 
@@ -158,16 +158,16 @@ export function FinanceTracker() {
     const hasTransactions = transactions.some(t => t.category === categoryName);
     
     if (hasTransactions) {
-      toast.error('Cannot delete category with existing transactions');
+      toast.error('Tidak bisa menghapus kategori yang masih punya transaksi');
       return;
     }
 
     try {
       await dataService.deleteCategory(categoryId);
       loadData();
-      toast.success('Category deleted successfully');
+      toast.success('Kategori berhasil dihapus');
     } catch (error) {
-      toast.error('Failed to delete category');
+      toast.error('Gagal menghapus kategori');
     }
   };
 
@@ -289,7 +289,7 @@ export function FinanceTracker() {
     });
     
     doc.save(`laporan-keuangan-${Date.now()}.pdf`);
-    toast.success('PDF exported successfully');
+    toast.success('PDF berhasil diekspor');
   };
 
   const exportToExcel = () => {
@@ -320,7 +320,7 @@ export function FinanceTracker() {
     
     XLSX.utils.book_append_sheet(wb, ws, 'Transaksi');
     XLSX.writeFile(wb, `laporan-keuangan-${Date.now()}.xlsx`);
-    toast.success('Excel exported successfully');
+    toast.success('Excel berhasil diekspor');
   };
 
   if (isLoading && transactions.length === 0) {
@@ -354,13 +354,13 @@ export function FinanceTracker() {
           
           <div className="flex items-center gap-4">
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={exportToPDF} className="dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 h-9 font-bold">
-                <Download className="w-4 h-4 mr-2" />
-                PDF
+              <Button variant="outline" size="sm" onClick={exportToPDF} className="dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 h-9 px-2 sm:px-3 font-bold">
+                <Download className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">PDF</span>
               </Button>
-              <Button variant="outline" size="sm" onClick={exportToExcel} className="dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 h-9 font-bold">
-                <Download className="w-4 h-4 mr-2" />
-                Excel
+              <Button variant="outline" size="sm" onClick={exportToExcel} className="dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 h-9 px-2 sm:px-3 font-bold">
+                <Download className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Excel</span>
               </Button>
             </div>
             <ThemeToggle />
@@ -773,5 +773,3 @@ export function FinanceTracker() {
     </div>
   );
 }
-
-

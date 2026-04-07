@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, type ChangeEvent } from 'react';
 import { Link } from 'react-router';
 import { useAuth } from '../contexts/AuthContext';
 import { dataService } from '../services/dataService';
 import { scannerService } from '../services/scanner';
-import { formatNumberToIDR, toIDRCurrency } from '../utils/formatters';
+import { voiceService } from '../services/voiceService';
+import { toIDRCurrency } from '../utils/formatters';
 import { AmountInput } from '../components/AmountInput';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -14,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
-import { ArrowLeft, Plus, Trash2, Users, Receipt, Download, Camera, Loader2, Upload, Share2, Check } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Users, Receipt, Download, Camera, Loader2, Upload, Share2, Check, Mic, MicOff } from 'lucide-react';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 
@@ -44,11 +45,105 @@ export function SplitBill() {
   const [tax, setTax] = useState(0);
   const [serviceCharge, setServiceCharge] = useState(0);
 
+  // Voice Dictation
+  const [isListening, setIsListening] = useState(false);
+  const [isVoiceParsing, setIsVoiceParsing] = useState(false);
+  const [voiceTranscript, setVoiceTranscript] = useState('');
+  const recognitionRef = useRef<any>(null);
+
+  const startListening = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error('Browser kamu tidak mendukung fitur rekam suara. Gunakan Chrome/Edge.');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'id-ID';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    let finalTranscript = '';
+
+    recognition.onresult = (event: any) => {
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript + ' ';
+        } else {
+          interim += transcript;
+        }
+      }
+      setVoiceTranscript(finalTranscript + interim);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      if (event.error === 'not-allowed') {
+        toast.error('Izin mikrofon ditolak. Aktifkan di pengaturan browser.');
+      } else {
+        toast.error('Gagal merekam suara: ' + event.error);
+      }
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      // Only auto-process if we stopped via button (isListening will be false)
+      // If it ended on its own due to silence, we still process
+      if (finalTranscript.trim()) {
+        processVoiceTranscript(finalTranscript.trim());
+      } else {
+        setIsListening(false);
+      }
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+    setVoiceTranscript('');
+    toast.info('🎙️ Mulai bicara... Sebutkan item, harga, dan siapa yang bayar.');
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
+    setIsListening(false);
+  };
+
+  const processVoiceTranscript = async (transcript: string) => {
+    if (!transcript) return;
+    setIsVoiceParsing(true);
+    try {
+      const parsedItems = await voiceService.parseVoiceInput(transcript, participants);
+      if (parsedItems.length === 0) {
+        toast.error('Tidak bisa mengenali item dari suara. Coba ulangi lebih jelas.');
+      } else {
+        const formattedItems = parsedItems.map(item => ({
+          id: `${Date.now()}-${Math.random()}`,
+          name: item.name,
+          price: item.price,
+          assigned_to: item.assigned_to,
+        }));
+        setItems(prev => [...prev, ...formattedItems]);
+        toast.success(`Berhasil menambahkan ${parsedItems.length} item dari suara!`);
+      }
+    } catch (error) {
+      toast.error('Gagal memproses suara. Coba lagi.');
+      console.error(error);
+    } finally {
+      setIsVoiceParsing(false);
+      setVoiceTranscript('');
+    }
+  };
+
   // OCR Dialog
 
   const [showOCRDialog, setShowOCRDialog] = useState(false);
 
-  const handleOCRFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleOCRFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -403,12 +498,50 @@ export function SplitBill() {
                       />
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       <Button variant="outline" onClick={() => setShowOCRDialog(true)} className="dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
                         <Camera className="w-4 h-4 mr-2" />
-                        Scan Nota / Struk
+                        Scan Nota
+                      </Button>
+                      <Button
+                        variant={isListening ? "destructive" : "outline"}
+                        onClick={isListening ? stopListening : startListening}
+                        disabled={isVoiceParsing}
+                        className={`transition-all ${
+                          isListening
+                            ? 'animate-pulse shadow-lg shadow-red-500/30'
+                            : 'dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        {isVoiceParsing ? (
+                          <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Memproses...</>
+                        ) : isListening ? (
+                          <><MicOff className="w-4 h-4 mr-2" /> Stop Rekam</>
+                        ) : (
+                          <><Mic className="w-4 h-4 mr-2" /> Dikte Suara</>
+                        )}
                       </Button>
                     </div>
+
+                    {/* Voice transcript preview */}
+                    {(isListening || voiceTranscript) && (
+                      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-xl p-4 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${isListening ? 'bg-red-500 animate-pulse' : 'bg-blue-500'}`} />
+                          <p className="text-[10px] font-black uppercase tracking-widest text-blue-700 dark:text-blue-400">
+                            {isListening ? 'Sedang Merekam...' : 'Memproses Suara...'}
+                          </p>
+                        </div>
+                        <p className="text-sm text-blue-900 dark:text-blue-300 font-medium italic min-h-[1.5rem]">
+                          {voiceTranscript || 'Menunggu suara...'}
+                        </p>
+                        {isListening && (
+                          <p className="text-[10px] text-blue-600/70 dark:text-blue-400/60 font-medium">
+                            💡 Contoh: "Es jeruk lima belas ribu untuk Budi" atau "Nasi goreng dua puluh ribu"
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 

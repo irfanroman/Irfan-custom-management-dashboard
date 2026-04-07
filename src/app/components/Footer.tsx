@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router';
 import { Wallet, Mail, Globe, Github, Twitter } from 'lucide-react';
 
@@ -62,13 +61,13 @@ export function Footer() {
             </h3>
             <div className="flex flex-col space-y-3">
               <a
-                href="mailto:hello@pandashboard.id"
+                href="mailto:support@pann.my.id"
                 className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors font-medium group"
               >
                 <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-black dark:group-hover:bg-white transition-colors">
                   <Mail className="w-4 h-4 group-hover:text-white dark:group-hover:text-black" />
                 </div>
-                <span>hello@pandashboard.id</span>
+                <span>support@pann.my.id</span>
               </a>
             </div>
           </div>

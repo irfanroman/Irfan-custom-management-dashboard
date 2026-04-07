@@ -1,6 +1,5 @@
-/// <reference types="vite/client" />
 import { createWorker } from 'tesseract.js';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { genAI } from './gemini';
 
 export interface ScannedItem {
   name: string;
@@ -13,9 +12,6 @@ export interface ScannedReceipt {
   serviceCharge: number;
   discount: number;
 }
-
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null;
 
 export const scannerService = {
   async scanReceipt(image: File, onProgress?: (progress: number) => void): Promise<ScannedReceipt> {

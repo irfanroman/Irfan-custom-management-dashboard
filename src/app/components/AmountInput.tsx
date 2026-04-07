@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { formatNumberToIDR, parseIDRToNumber } from '../utils/formatters';
+import { formatNumberToIDR } from '../utils/formatters';
 
 interface AmountInputProps {
   id: string;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router';
 import { dataService } from '../services/dataService';
 import { toIDRCurrency } from '../utils/formatters';

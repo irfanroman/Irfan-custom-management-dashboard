@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Navigate } from 'react-router';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
@@ -22,7 +22,7 @@ export function Login() {
     return <Navigate to="/" replace />;
   }
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     
     if (!loginForm.email || !loginForm.password) {
@@ -41,7 +41,7 @@ export function Login() {
     }
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleRegister = async (e: FormEvent) => {
     e.preventDefault();
     
     if (!registerForm.email || !registerForm.password || !registerForm.username || !registerForm.confirmPassword) {
@@ -250,5 +250,3 @@ export function Login() {
     </div>
   );
 }
-
-

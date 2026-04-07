@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type FC, type ReactNode } from 'react';
 import { supabase } from '../services/supabase';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -19,62 +19,39 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+/** Maps a Supabase user object to our app's User shape */
+const mapSupabaseUser = (sbUser: SupabaseUser): User => ({
+  id: sbUser.id,
+  username: sbUser.user_metadata.username || sbUser.email?.split('@')[0] || 'User',
+  email: sbUser.email,
+});
+
+export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check current session
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          username: session.user.user_metadata.username || session.user.email?.split('@')[0] || 'User',
-          email: session.user.email,
-        });
-      }
+      if (session?.user) setUser(mapSupabaseUser(session.user));
       setIsLoading(false);
     };
 
     checkUser();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          username: session.user.user_metadata.username || session.user.email?.split('@')[0] || 'User',
-          email: session.user.email,
-        });
-      } else {
-        setUser(null);
-      }
+      setUser(session?.user ? mapSupabaseUser(session.user) : null);
       setIsLoading(false);
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      
-      if (data.user) {
-        setUser({
-          id: data.user.id,
-          username: data.user.user_metadata.username || data.user.email?.split('@')[0] || 'User',
-          email: data.user.email,
-        });
-      }
+      if (data.user) setUser(mapSupabaseUser(data.user));
       return { success: true };
     } catch (error: any) {
       return { success: false, error: error.message };
@@ -86,22 +63,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            username: username,
-          },
-        },
+        options: { data: { username } },
       });
-
       if (error) throw error;
-
-      if (data.user) {
-        setUser({
-          id: data.user.id,
-          username: username,
-          email: data.user.email,
-        });
-      }
+      if (data.user) setUser({ ...mapSupabaseUser(data.user), username });
       return { success: true };
     } catch (error: any) {
       return { success: false, error: error.message };
@@ -115,14 +80,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   return (
     <AuthContext.Provider
-      value={{
-        user,
-        login,
-        register,
-        logout,
-        isAuthenticated: !!user,
-        isLoading,
-      }}
+      value={{ user, login, register, logout, isAuthenticated: !!user, isLoading }}
     >
       {children}
     </AuthContext.Provider>
@@ -136,4 +94,3 @@ export const useAuth = () => {
   }
   return context;
 };
-

@@ -1,9 +1,8 @@
-import React from 'react';
 import { Link } from 'react-router';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { LineChart, Users, Wallet, LogOut, Target, Scan, LucideIcon } from 'lucide-react';
+import { LineChart, Users, Wallet, LogOut, Target, Scan } from 'lucide-react';
 import { ThemeToggle } from '../components/ThemeToggle';
 
 export function Dashboard() {
@@ -152,5 +151,3 @@ export function Dashboard() {
     </div>
   );
 }
-
-
