@@ -7,42 +7,48 @@ import { BudgetPlanner } from './pages/BudgetPlanner';
 import { SharedBill } from './pages/SharedBill';
 import { NotFound } from './pages/NotFound';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { MainLayout } from './components/MainLayout';
 
 export const router = createBrowserRouter([
   {
-    path: '/',
-    Component: Dashboard,
+    element: <MainLayout />,
+    children: [
+      {
+        path: '/',
+        Component: Dashboard,
+      },
+      {
+        path: '/finance-tracker',
+        element: (
+          <ProtectedRoute>
+            <FinanceTracker />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/split-bill',
+        element: <SplitBill />,
+      },
+      {
+        path: '/budget-planner',
+        element: (
+          <ProtectedRoute>
+            <BudgetPlanner />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '*',
+        Component: NotFound,
+      },
+    ],
   },
   {
     path: '/login',
     Component: Login,
   },
   {
-    path: '/finance-tracker',
-    element: (
-      <ProtectedRoute>
-        <FinanceTracker />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '/split-bill',
-    element: <SplitBill />,
-  },
-  {
     path: '/s/:id',
     element: <SharedBill />,
-  },
-  {
-    path: '/budget-planner',
-    element: (
-      <ProtectedRoute>
-        <BudgetPlanner />
-      </ProtectedRoute>
-    ),
-  },
-  {
-    path: '*',
-    Component: NotFound,
   },
 ]);
